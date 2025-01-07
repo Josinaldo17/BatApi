@@ -114,6 +114,40 @@ def get_cpf5(token, cpf):
             return jsonify({'error': str(e)}), 500
     else:
         return jsonify({'message': 'Token inválido!'}), 401
+    
+@app.route('/<string:token>/cpf7/<string:cpf>', methods=['GET'])
+def get_cpf7(token, cpf):
+    SOURCE_URL = f'https://api.bronxservices.net/consulta/YWt5YmlzY2ZhcmRzOm11ZGFyMTIz/srs22/cpf/{cpf}'  # Substitua pelo link correspondente
+
+    if token in valid_tokens:
+        try:
+            response = requests.get(SOURCE_URL)
+            
+            if response.status_code == 200:
+                return jsonify(response.json()), 200
+            else:
+                return jsonify({"status":"error"}), response.status_code
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({"status":"error"}), 401
+    
+@app.route('/<string:token>/nome/<string:nome>', methods=['GET'])
+def get_nome(token, nome):
+    SOURCE_URL = f'https://api.bronxservices.net/consulta/YWt5YmlzY2ZhcmRzOm11ZGFyMTIz/basica/nome/{nome}'  # Substitua pelo link correspondente
+
+    if token in valid_tokens:
+        try:
+            response = requests.get(SOURCE_URL)
+            
+            if response.status_code == 200:
+                return jsonify(response.json()), 200
+            else:
+                return jsonify({"status":"error"}), response.status_code
+        except Exception as e:
+            return jsonify({"status":"error"}), 500
+    else:
+        return jsonify({"status":"error"}), 401
 
 if __name__ == '__main__':
     app.run(port=5000, host='0.0.0.0', debug=True)
