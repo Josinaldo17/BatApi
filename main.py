@@ -157,38 +157,54 @@ def get_cpf4(cpf):
 
     try:
         response = requests.get(SOURCE_URL)
+
         
         if response.status_code == 200:
 
-            print(response.json())
 
-            dados = response.json()[0]
-
-            cpf = dados.get('cpf', 'Nao consta')
-            nome = dados.get('Nome', 'Nao consta')
-            mae = dados.get('Nome_Mae', 'Nao consta')
-            nasc = dados.get('Data_Nascimento', 'Nao consta')
-            sexo = dados.get('Sexo', 'Nao consta')
-
-            final = { 
-                "dados" : [ {
-                "cpf": cpf,
-                "nome": nome,
-                "mae": mae,
-                "nasc": nasc,
-                "sexo": sexo
-                    }],
-                "status": "sucesso"
-            }
+            if 'dados' in response.json()[0]['response']:
 
 
+                dados = response.json()[0]['response']
+
+                cpf = dados['dados']['CONTATOS'].get('CPF', 'Nao consta')
+                nome = dados['dados']['CONTATOS'].get('NOME', 'Nao consta')
+                mae = dados['dados']['CONTATOS'].get('NOME_MAE', 'Nao consta')
+                nasc = dados['dados']['CONTATOS'].get('NASC', 'Nao consta')
+                sexo = dados['dados']['CONTATOS'].get('SEXO', 'Nao consta')
+
+                if nasc != 'Nao consta':
+                    from datetime import datetime
+                    try:
+                        
+                        nasc_obj = datetime.strptime(nasc, "%Y-%m-%d %H:%M:%S.%f") 
+                        nasc = nasc_obj.strftime("%d/%m/%Y") 
+                    except ValueError:
+                        nasc = "Formato de data inválido"
+
+
+                final = { 
+                    "dados" : [ {
+                    "cpf": cpf,
+                    "nome": nome,
+                    "mae": mae,
+                    "nasc": nasc,
+                    "sexo": sexo
+                     }],
+                    "status": "sucesso"
+                }
+
+
+                
+                return jsonify(final), 200
             
-            return jsonify(final), 200
-        
+            else:
+                return jsonify({'status' : 'Nao consta'}), response.status_code
         else:
-            return jsonify({'status' : 'Nao consta'}), response.status_code
+            return jsonify({'status': 'erro hospedagem'}), response.status_code
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': 'erro banco'}), 500 
 
 
 @app.route('/cpf5/<string:cpf>', methods=['GET'])
